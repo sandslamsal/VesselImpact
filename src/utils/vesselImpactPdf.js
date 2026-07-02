@@ -1,4 +1,4 @@
-// Premium engineering PDF report for VesselImpact. Each derivation step is
+// Premium engineering PDF report for Vessel Impact. Each derivation step is
 // drawn with its reference, description, and the LaTeX equation rendered to a
 // crisp image (symbolic = substituted = result), so the report reads as a full
 // engineering calculation with every clause / equation / figure citation to
@@ -71,7 +71,7 @@ export async function generateVesselImpactPdf(data) {
       doc.triangle(M + 4, 33, M + 14, 27, M + 14, 38, 'F')
       setText(C.white)
       font('bold', 17)
-      doc.text('VesselImpact', M + 36, 28, { baseline: 'middle' })
+      doc.text('Vessel Impact', M + 36, 28, { baseline: 'middle' })
       font('normal', 8.5)
       doc.setTextColor(206, 219, 245)
       doc.text('Vessel Collision Design Forces', M + 36, 42, { baseline: 'middle' })
@@ -100,7 +100,7 @@ export async function generateVesselImpactPdf(data) {
       doc.line(M, H - 30, W - M, H - 30)
       font('normal', 7.5)
       setText(C.faint)
-      doc.text('VesselImpact  ·  AASHTO LRFD Section 3.14 Vessel Collision', M, H - 20, { baseline: 'middle' })
+      doc.text('Vessel Impact  ·  AASHTO LRFD Section 3.14 Vessel Collision', M, H - 20, { baseline: 'middle' })
       if (dateStr) doc.text(dateStr, W / 2 + 60, H - 20, { align: 'center', baseline: 'middle' })
       doc.text(`Page ${p} of ${total}  ·  v${VERSION}`, W - M, H - 20, { align: 'right', baseline: 'middle' })
     }
@@ -198,6 +198,17 @@ export async function generateVesselImpactPdf(data) {
       }
       if (eqs.length) y += 3
     }
+  }
+
+  // Notes section with orphan control: the heading keeps enough room for the
+  // first note, so it never sits alone at the bottom of a page.
+  const notesSection = async (notes) => {
+    const first = notes[0]
+    const text = typeof first === 'string' ? first : first.text
+    font('normal', 8.5)
+    const lines = doc.splitTextToSize(text, innerW - 24)
+    sectionTitle('Notes', lines.length * 11 + 10)
+    await notesBlock(notes)
   }
 
   // one "symbol = value unit" LaTeX line
@@ -315,8 +326,7 @@ export async function generateVesselImpactPdf(data) {
     await drawSteps(s.sup)
     sectionTitle('Application of Impact Force (Art. 3.14.14.1)', 90)
     await drawSteps(s.app)
-    sectionTitle('Notes')
-    await notesBlock([
+    await notesSection([
       'The equivalent static impact force represents a probabilistically based, worst-case, head-on collision with the vessel moving forward at relatively high velocity (C3.14.1). Requirements apply to steel-hulled merchant ships larger than 1,000 DWT.',
       'For substructure design, 100 percent of the impact force is applied parallel to the channel centerline, or 50 percent normal to it, as separate load cases (Art. 3.14.14.1). For overall stability the force is applied as a concentrated force at the mean high water level; for local checks it is a line load over the bow depth (Figs. 3.14.14.1-1, -2).',
       'The vessel collision load is combined at the Extreme Event II limit state (Table 3.4.1-1) and applies to the design of the pier, its foundation, and connections. Bow overhang (rake/flair) may extend over fenders and strike columns above the waterline; setback contact should be considered (C3.14.14.1).',
@@ -368,8 +378,7 @@ export async function generateVesselImpactPdf(data) {
     await drawSteps(b.steps)
     sectionTitle('Application of Impact Force (Art. 3.14.14.1)', 90)
     await drawSteps(b.app)
-    sectionTitle('Notes')
-    await notesBlock([
+    await notesSection([
       'The standard hopper barge is 35.0 ft × 195.0 ft with 12.0 ft depth, 1.7 ft empty draft, 8.7 ft loaded draft, and 1,700 tons DWT (Art. 3.14.11). Eqs. 3.14.11-1/-2 and 3.14.12-1 were developed from Meir-Dornberg (1983) collision research (C3.14.11).',
       'Displacement tonnage of a barge tow is the tug/tow vessel plus the combined displacement of one row of barges in the length of the tow (Art. 3.14.7). LOA of the tow includes the tug (Art. 3.14.6). Barges are rated in tons (2,000 lb); Eq. 3.14.7-1 uses metric tonnes (2,205 lb).',
       'The barge collision load formulation is for a standard rake head log height of 2.0 to 3.0 ft; for deeper head logs (tanker or deck barges), the force may be increased in proportion to the head log height (C3.14.11). The width modification RB = BB/35 follows the AASHTO Guide Specifications for Vessel Collision Design of Highway Bridges (2009).',
@@ -422,8 +431,7 @@ export async function generateVesselImpactPdf(data) {
     await drawSteps(res.pfSteps)
     sectionTitle('Annual Frequency of Collapse (Eq. 3.14.5-1)', 90)
     await drawSteps(res.afSteps)
-    sectionTitle('Notes')
-    await notesBlock([
+    await notesSection([
       'AF is computed for each bridge component and vessel classification; the annual frequency of collapse for the total bridge is the sum of all component AFs (Art. 3.14.5). The acceptance criterion is distributed over the exposed pier and span components within 3.0 × LOA of the transit path (Art. 3.14.5).',
       'The approximate method for PA is an empirical relationship based on historical accident data; influences such as wind, visibility, navigation aids, and pilotage are included only indirectly (C3.14.5.2.3).',
       'The geometric probability uses a normal distribution with the mean at the vessel transit path centerline and σ = LOA; components beyond 3σ need not be included, other than the minimum impact requirement of Art. 3.14.1 (C3.14.5.3). For barge tows, LOA is the total tow length including the towboat.',

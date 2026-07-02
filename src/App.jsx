@@ -32,7 +32,7 @@ export default function App() {
               </svg>
             </span>
             <div>
-              <h1>VesselImpact</h1>
+              <h1>Vessel Impact</h1>
               <p className="header-sub">
                 Vessel collision design forces for bridge piers and
                 superstructures — ship impact, barge impact, and Method II
@@ -78,7 +78,7 @@ export default function App() {
 
       <footer className="site-footer">
         <div className="footer-inner">
-          <span className="footer-brand">VesselImpact</span>
+          <span className="footer-brand">Vessel Impact</span>
           <span className="footer-dot">·</span>
           <span>AASHTO LRFD Bridge Design Specifications — Section 3.14 Vessel Collision</span>
           <a href="https://sandeshlamsal.com/apps/" className="footer-link">
