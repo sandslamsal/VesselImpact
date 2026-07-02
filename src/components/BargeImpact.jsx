@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Container } from 'lucide-react'
 import { bargeImpact, designVelocity, hydroMassCoeff } from '../utils/vesselCollision.js'
 import { num, NumberField, ResultCard, SelectField } from './shared.jsx'
-import { MathStepList, MathValues, mvtex } from './mathview.jsx'
+import { MathStepList, MathValues, mvtex, TexText } from './mathview.jsx'
 import { Figure } from './figview.jsx'
 import { bargeImpactFigure } from '../utils/figures.js'
 import { generateVesselImpactPdf } from '../utils/vesselImpactPdf.js'
@@ -66,11 +66,7 @@ export function BargeImpact() {
           <div>
             <h3>Barge Collision Forces</h3>
             <p>
-              Barge tow collision with a bridge pier, AASHTO LRFD Articles
-              3.14.7, 3.14.11, and 3.14.12. The standard hopper barge is
-              35 ft × 195 ft (12 ft depth, 1,700 tons DWT); the tow displacement
-              is the tug plus one row of barges in the length of the tow
-              (Art. 3.14.7). LOA of the tow includes the tug (Art. 3.14.6).
+              <TexText text="Barge tow collision with a bridge pier, AASHTO LRFD Articles 3.14.7, 3.14.11, and 3.14.12. The standard hopper barge is 35 ft × 195 ft (12 ft depth, 1,700 tons $DWT$); the tow displacement is the tug plus one row of barges in the length of the tow (Art. 3.14.7). $LOA$ of the tow includes the tug (Art. 3.14.6)." />
             </p>
           </div>
         </div>
@@ -78,11 +74,11 @@ export function BargeImpact() {
         <div className="section-label">Barge tow</div>
         <div className="field-grid">
           <NumberField label="Barges in one row of the tow" unit="no." value={nBarges} onChange={setNBarges} min="1" step="1" />
-          <NumberField label="Displacement per barge" unit="tons" value={Wbarge} onChange={setWbarge} hint="loaded standard hopper ≈ 1,900 tons; empty ≈ 200 tons" />
+          <NumberField label="Displacement per barge" unit="tons" value={Wbarge} onChange={setWbarge} hint="$\approx$ 1,900 tons loaded standard hopper; $\approx$ 200 tons empty" />
           <NumberField label="Tug displacement" unit="tons" value={Wtug} onChange={setWtug} />
-          <NumberField label="Tow length overall LOA (incl. tug)" unit="ft" value={LOA} onChange={setLOA} />
-          <NumberField label="Barge width B_B" unit="ft" value={BB} onChange={setBB} hint="35 ft = standard hopper barge" />
-          <NumberField label="Head log height" unit="ft" value={headLog} onChange={setHeadLog} hint="standard rake head log 2.0–3.0 ft (C3.14.11)" />
+          <NumberField label="Tow length overall $LOA$ (incl. tug)" unit="ft" value={LOA} onChange={setLOA} />
+          <NumberField label="Barge width $B_B$" unit="ft" value={BB} onChange={setBB} hint="35 ft = standard hopper barge" />
+          <NumberField label="Head log height $h_{HL}$" unit="ft" value={headLog} onChange={setHeadLog} hint="standard rake head log 2.0–3.0 ft (C3.14.11)" />
           <NumberField label="Draft" unit="ft" value={draft} onChange={setDraft} hint="loaded 8.7 ft / empty 1.7 ft (standard hopper)" />
           <NumberField label="Underkeel clearance" unit="ft" value={ukc} onChange={setUkc} />
         </div>
@@ -91,13 +87,13 @@ export function BargeImpact() {
         <div className="field-grid">
           <SelectField label="Velocity input" value={vMode} onChange={setVMode} options={['distribution (Fig. 3.14.6-1)', 'direct']} />
           {vMode === 'direct' ? (
-            <NumberField label="Impact velocity V" unit="ft/s" value={Vdirect} onChange={setVdirect} />
+            <NumberField label="Impact velocity $V$" unit="ft/s" value={Vdirect} onChange={setVdirect} />
           ) : (
             <>
-              <NumberField label="Transit velocity V_T" unit="ft/s" value={VT} onChange={setVT} hint="1 knot = 1.688 ft/s" />
-              <NumberField label="Min. velocity V_MIN" unit="ft/s" value={Vmin} onChange={setVmin} hint="≥ yearly mean current velocity" />
-              <NumberField label="Pier distance x from transit path ℄" unit="ft" value={xDist} onChange={setXDist} />
-              <NumberField label="Channel edge distance x_C" unit="ft" value={xc} onChange={setXc} />
+              <NumberField label="Transit velocity $V_T$" unit="ft/s" value={VT} onChange={setVT} hint="1 knot = 1.688 ft/s" />
+              <NumberField label="Min. velocity $V_{MIN}$" unit="ft/s" value={Vmin} onChange={setVmin} hint="$\ge$ yearly mean current velocity" />
+              <NumberField label="Pier distance $x$ from transit path ℄" unit="ft" value={xDist} onChange={setXDist} />
+              <NumberField label="Channel edge distance $x_C$" unit="ft" value={xc} onChange={setXc} />
             </>
           )}
         </div>
@@ -106,10 +102,10 @@ export function BargeImpact() {
       {res ? (
         <>
           <div className="result-grid">
-            <ResultCard label="Barge impact force on pier" value={res.barge.PB} unit="kip" refText={res.barge.aB < 0.34 ? 'Eq. 3.14.11-1' : 'Eq. 3.14.11-2'} accent />
-            <ResultCard label="Collision energy" value={res.barge.KE} unit="kip·ft" refText="Eq. 3.14.7-1" />
-            <ResultCard label="Barge bow damage length" value={res.barge.aB} unit="ft" refText="Eq. 3.14.12-1" />
-            <ResultCard label="Impact velocity" value={res.vel.V} unit="ft/s" refText="Fig. 3.14.6-1" />
+            <ResultCard label="Barge impact force on pier $P_B$" value={res.barge.PB} unit="kip" refText={res.barge.aB < 0.34 ? 'Eq. 3.14.11-1' : 'Eq. 3.14.11-2'} accent />
+            <ResultCard label="Collision energy $KE$" value={res.barge.KE} unit="kip·ft" refText="Eq. 3.14.7-1" />
+            <ResultCard label="Barge bow damage length $a_B$" value={res.barge.aB} unit="ft" refText="Eq. 3.14.12-1" />
+            <ResultCard label="Impact velocity $V$" value={res.vel.V} unit="ft/s" refText="Fig. 3.14.6-1" />
           </div>
 
           <section className="results-card">
@@ -131,7 +127,7 @@ export function BargeImpact() {
             <div className="results-head">
               <div>
                 <h3>Pier Design Forces (Arts. 3.14.11–3.14.12, 3.14.14.1)</h3>
-                <p>100% of P_B parallel to the channel centerline, or 50% normal to it, applied separately.</p>
+                <p><TexText text="100% of $P_B$ parallel to the channel centerline, or 50% normal to it, applied separately." /></p>
               </div>
             </div>
             <MathValues

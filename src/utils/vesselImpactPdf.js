@@ -1,4 +1,4 @@
-// Premium engineering PDF report for VesselImpactX. Each derivation step is
+// Premium engineering PDF report for VesselImpact. Each derivation step is
 // drawn with its reference, description, and the LaTeX equation rendered to a
 // crisp image (symbolic = substituted = result), so the report reads as a full
 // engineering calculation with every clause / equation / figure citation to
@@ -71,7 +71,7 @@ export async function generateVesselImpactPdf(data) {
       doc.triangle(M + 4, 33, M + 14, 27, M + 14, 38, 'F')
       setText(C.white)
       font('bold', 17)
-      doc.text('VesselImpactX', M + 36, 28, { baseline: 'middle' })
+      doc.text('VesselImpact', M + 36, 28, { baseline: 'middle' })
       font('normal', 8.5)
       doc.setTextColor(206, 219, 245)
       doc.text('Vessel Collision Design Forces', M + 36, 42, { baseline: 'middle' })
@@ -100,7 +100,7 @@ export async function generateVesselImpactPdf(data) {
       doc.line(M, H - 30, W - M, H - 30)
       font('normal', 7.5)
       setText(C.faint)
-      doc.text('VesselImpactX  ·  AASHTO LRFD Section 3.14 Vessel Collision', M, H - 20, { baseline: 'middle' })
+      doc.text('VesselImpact  ·  AASHTO LRFD Section 3.14 Vessel Collision', M, H - 20, { baseline: 'middle' })
       if (dateStr) doc.text(dateStr, W / 2 + 60, H - 20, { align: 'center', baseline: 'middle' })
       doc.text(`Page ${p} of ${total}  ·  v${VERSION}`, W - M, H - 20, { align: 'right', baseline: 'middle' })
     }
@@ -433,7 +433,7 @@ export async function generateVesselImpactPdf(data) {
   }
 
   stampFooters()
-  const safe = (project.name || `vesselimpactx-${module}`).replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+  const safe = (project.name || `vesselimpact-${module}`).replace(/[^a-z0-9]+/gi, '-').toLowerCase()
   doc.save(`${safe}-report.pdf`)
   return doc
 }

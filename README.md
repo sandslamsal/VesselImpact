@@ -1,4 +1,4 @@
-# VesselImpactX
+# VesselImpact
 
 Browser-based **vessel collision design calculator** for bridge piers and
 superstructures per **AASHTO LRFD Bridge Design Specifications, 9th Edition,
@@ -39,5 +39,5 @@ npm run build    # production build in dist/
 
 ## Disclaimer
 
-VesselImpactX is an engineering aid. Verify all results against the governing
+VesselImpact is an engineering aid. Verify all results against the governing
 edition of the AASHTO LRFD Bridge Design Specifications before design use.

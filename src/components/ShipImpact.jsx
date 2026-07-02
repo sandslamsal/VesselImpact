@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Ship } from 'lucide-react'
 import { shipImpact, designVelocity, hydroMassCoeff } from '../utils/vesselCollision.js'
 import { num, NumberField, ResultCard, SelectField } from './shared.jsx'
-import { MathStepList, MathValues, mvtex } from './mathview.jsx'
+import { MathStepList, MathValues, mvtex, TexText } from './mathview.jsx'
 import { Figure } from './figview.jsx'
 import { shipImpactFigure } from '../utils/figures.js'
 import { generateVesselImpactPdf } from '../utils/vesselImpactPdf.js'
@@ -76,10 +76,10 @@ export function ShipImpact() {
 
         <div className="section-label">Design vessel</div>
         <div className="field-grid">
-          <NumberField label="Deadweight tonnage DWT" unit="tonne" value={DWT} onChange={setDWT} />
-          <NumberField label="Displacement tonnage W" unit="tonne" value={Wship} onChange={setWship} hint="empty weight + cargo / ballast (Art. 3.14.7)" />
-          <NumberField label="Length overall LOA" unit="ft" value={LOA} onChange={setLOA} />
-          <NumberField label="Bow depth D_B" unit="ft" value={DB} onChange={setDB} />
+          <NumberField label="Deadweight tonnage $DWT$" unit="tonne" value={DWT} onChange={setDWT} />
+          <NumberField label="Displacement tonnage $W$" unit="tonne" value={Wship} onChange={setWship} hint="empty weight + cargo / ballast (Art. 3.14.7)" />
+          <NumberField label="Length overall $LOA$" unit="ft" value={LOA} onChange={setLOA} />
+          <NumberField label="Bow depth $D_B$" unit="ft" value={DB} onChange={setDB} />
           <NumberField label="Draft" unit="ft" value={draft} onChange={setDraft} />
           <NumberField label="Underkeel clearance" unit="ft" value={ukc} onChange={setUkc} hint="bottom of vessel to bottom of waterway" />
         </div>
@@ -88,30 +88,30 @@ export function ShipImpact() {
         <div className="field-grid">
           <SelectField label="Velocity input" value={vMode} onChange={setVMode} options={['distribution (Fig. 3.14.6-1)', 'direct']} />
           {vMode === 'direct' ? (
-            <NumberField label="Impact velocity V" unit="ft/s" value={Vdirect} onChange={setVdirect} />
+            <NumberField label="Impact velocity $V$" unit="ft/s" value={Vdirect} onChange={setVdirect} />
           ) : (
             <>
-              <NumberField label="Transit velocity V_T" unit="ft/s" value={VT} onChange={setVT} hint="1 knot = 1.688 ft/s" />
-              <NumberField label="Min. velocity V_MIN" unit="ft/s" value={Vmin} onChange={setVmin} hint="≥ yearly mean current velocity" />
-              <NumberField label="Pier distance x from transit path ℄" unit="ft" value={xDist} onChange={setXDist} />
-              <NumberField label="Channel edge distance x_C" unit="ft" value={xc} onChange={setXc} />
+              <NumberField label="Transit velocity $V_T$" unit="ft/s" value={VT} onChange={setVT} hint="1 knot = 1.688 ft/s" />
+              <NumberField label="Min. velocity $V_{MIN}$" unit="ft/s" value={Vmin} onChange={setVmin} hint="$\ge$ yearly mean current velocity" />
+              <NumberField label="Pier distance $x$ from transit path ℄" unit="ft" value={xDist} onChange={setXDist} />
+              <NumberField label="Channel edge distance $x_C$" unit="ft" value={xc} onChange={setXc} />
             </>
           )}
         </div>
 
         <div className="section-label">Superstructure exposure (Art. 3.14.10)</div>
         <div className="field-grid">
-          <NumberField label="Exposed superstructure depth" unit="ft" value={hExp} onChange={setHExp} hint="vertical overlap of bow and superstructure; 0 if clear" />
+          <NumberField label="Exposed superstructure depth $h_{exp}$" unit="ft" value={hExp} onChange={setHExp} hint="vertical overlap of bow and superstructure; 0 if clear" />
         </div>
       </section>
 
       {res ? (
         <>
           <div className="result-grid">
-            <ResultCard label="Ship impact force on pier" value={res.ship.PS} unit="kip" refText="Eq. 3.14.8-1" accent />
-            <ResultCard label="Collision energy" value={res.ship.KE} unit="kip·ft" refText="Eq. 3.14.7-1" />
-            <ResultCard label="Bow damage length" value={res.ship.aS} unit="ft" refText="Eq. 3.14.9-1" />
-            <ResultCard label="Impact velocity" value={res.vel.V} unit="ft/s" refText="Fig. 3.14.6-1" />
+            <ResultCard label="Ship impact force on pier $P_S$" value={res.ship.PS} unit="kip" refText="Eq. 3.14.8-1" accent />
+            <ResultCard label="Collision energy $KE$" value={res.ship.KE} unit="kip·ft" refText="Eq. 3.14.7-1" />
+            <ResultCard label="Bow damage length $a_S$" value={res.ship.aS} unit="ft" refText="Eq. 3.14.9-1" />
+            <ResultCard label="Impact velocity $V$" value={res.vel.V} unit="ft/s" refText="Fig. 3.14.6-1" />
           </div>
 
           <section className="results-card">
@@ -133,7 +133,7 @@ export function ShipImpact() {
             <div className="results-head">
               <div>
                 <h3>Pier Design Forces (Arts. 3.14.7–3.14.9, 3.14.14.1)</h3>
-                <p>100% of P_S parallel to the channel centerline, or 50% normal to it, applied separately.</p>
+                <p><TexText text="100% of $P_S$ parallel to the channel centerline, or 50% normal to it, applied separately." /></p>
               </div>
             </div>
             <MathValues
@@ -175,7 +175,7 @@ export function ShipImpact() {
           />
         </>
       ) : (
-        <div className="status-banner">Enter a valid vessel (DWT, W and velocity greater than zero) to compute forces.</div>
+        <div className="status-banner"><TexText text="Enter a valid vessel ($DWT$, $W$ and velocity greater than zero) to compute forces." /></div>
       )}
     </>
   )

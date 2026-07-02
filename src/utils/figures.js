@@ -1,4 +1,4 @@
-// Self-contained, fully-labeled SVG definition figures for VesselImpactX.
+// Self-contained, fully-labeled SVG definition figures for VesselImpact.
 // Every input is annotated with its symbol, value, and unit; computed force
 // resultants are drawn as vectors. The same SVG string is rendered live in the
 // app and rasterized into the PDF report. Drawings scale with the input

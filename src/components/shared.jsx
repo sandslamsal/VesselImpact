@@ -1,39 +1,46 @@
 /* eslint-disable react-refresh/only-export-components */
-// Shared UI helpers for the VesselImpactX modules.
+// Shared UI helpers for the VesselImpact modules.
+//
+// Labels, hints, units, and descriptions all accept inline $...$ LaTeX so the
+// interface reads in AASHTO notation (e.g. label="Transit velocity $V_T$").
+// Units are rendered upright (roman) inside the input as an adornment.
 
-export const num = (v, fallback = 0) => {
-  const p = Number.parseFloat(v)
-  return Number.isFinite(p) ? p : fallback
-}
+import { TexText, Math as MathTex, unitTex } from './mathview.jsx'
+import { fmt } from '../utils/format.js'
+export { num, fmt } from '../utils/format.js'
 
-// Format a numeric value for display with sensible precision.
-export function fmt(v, digits = 2) {
-  if (!Number.isFinite(v)) return '—'
-  const a = Math.abs(v)
-  if (a !== 0 && (a < 0.001 || a >= 1e6)) return v.toExponential(2)
-  return v.toLocaleString(undefined, {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  })
+function UnitBadge({ unit }) {
+  if (!unit) return null
+  return (
+    <span className="input-unit" aria-hidden="true">
+      <MathTex tex={`\\mathrm{${unitTex(unit)}}`} />
+    </span>
+  )
 }
 
 export function NumberField({ label, unit, value, onChange, step = 'any', min, disabled = false, hint }) {
   return (
     <label className="field">
       <span className="field-label">
-        {label}
-        {unit ? <span className="field-unit"> ({unit})</span> : null}
+        <TexText text={label} />
       </span>
-      <input
-        className="field-input"
-        type="number"
-        step={step}
-        min={min}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
-      {hint ? <span className="field-hint">{hint}</span> : null}
+      <span className="input-wrap">
+        <input
+          className={`field-input ${unit ? 'field-input-adorned' : ''}`}
+          type="number"
+          step={step}
+          min={min}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
+        />
+        <UnitBadge unit={unit} />
+      </span>
+      {hint ? (
+        <span className="field-hint">
+          <TexText text={hint} />
+        </span>
+      ) : null}
     </label>
   )
 }
@@ -44,20 +51,22 @@ export function AutoNumberField({ label, unit, value, onChange, auto, onAuto, co
   return (
     <label className="field">
       <span className="field-label">
-        {label}
-        {unit ? <span className="field-unit"> ({unit})</span> : null}
+        <TexText text={label} />
         <label className="auto-toggle">
           <input type="checkbox" checked={auto} onChange={(e) => onAuto(e.target.checked)} />
           <span>auto</span>
         </label>
       </span>
-      <input
-        className="field-input"
-        type="number"
-        value={auto ? Number((computed || 0).toFixed(2)) : value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={auto}
-      />
+      <span className="input-wrap">
+        <input
+          className={`field-input ${unit ? 'field-input-adorned' : ''}`}
+          type="number"
+          value={auto ? Number((computed || 0).toFixed(2)) : value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={auto}
+        />
+        <UnitBadge unit={unit} />
+      </span>
     </label>
   )
 }
@@ -65,7 +74,9 @@ export function AutoNumberField({ label, unit, value, onChange, auto, onAuto, co
 export function SelectField({ label, value, onChange, options }) {
   return (
     <label className="field">
-      <span className="field-label">{label}</span>
+      <span className="field-label">
+        <TexText text={label} />
+      </span>
       <select
         className="field-input"
         value={value}
@@ -81,14 +92,22 @@ export function SelectField({ label, value, onChange, options }) {
   )
 }
 
-// A headline result card: label, value, unit, and the governing reference.
+// A headline result card: label (with LaTeX), value, unit, and the governing
+// clause reference.
 export function ResultCard({ label, value, unit, refText, accent, digits = 2 }) {
   return (
     <div className={`result-card ${accent ? 'result-card-accent' : ''}`}>
-      <span className="result-card-label">{label}</span>
+      <span className="result-card-label">
+        <TexText text={label} />
+      </span>
       <span className="result-card-value">
         {fmt(value, digits)}
-        {unit ? <span className="result-card-unit"> {unit}</span> : null}
+        {unit ? (
+          <span className="result-card-unit">
+            {' '}
+            <MathTex tex={`\\mathrm{${unitTex(unit)}}`} />
+          </span>
+        ) : null}
       </span>
       {refText ? <span className="result-card-ref">{refText}</span> : null}
     </div>
@@ -99,7 +118,8 @@ export function ResultCard({ label, value, unit, refText, accent, digits = 2 }) 
 export function Verdict({ pass, label }) {
   return (
     <span className={`verdict ${pass ? 'verdict-pass' : 'verdict-fail'}`}>
-      {pass ? '✓' : '✗'} {label}
+      <span className="verdict-mark">{pass ? '✓' : '✗'}</span>
+      <TexText text={label} />
     </span>
   )
 }

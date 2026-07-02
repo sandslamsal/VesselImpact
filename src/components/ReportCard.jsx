@@ -42,7 +42,7 @@ export function ReportCard({ onGenerate }) {
           <span className="field-label">Report logo</span>
           <label className="check-inline">
             <input type="checkbox" checked={includeLogo} onChange={(e) => setIncludeLogo(e.target.checked)} />
-            <span>Include VesselImpactX logo</span>
+            <span>Include VesselImpact logo</span>
           </label>
         </label>
         <SelectField label="Page size" value={pageSize} onChange={setPageSize} options={['letter', 'a4']} />

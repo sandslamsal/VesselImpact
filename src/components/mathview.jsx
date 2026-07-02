@@ -1,9 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
-// LaTeX math rendering for VesselImpactX, powered by KaTeX.
+// LaTeX math rendering for VesselImpact, powered by KaTeX.
 import { useMemo } from 'react'
 import katex from 'katex'
 import 'katex/dist/katex.min.css'
-import { fmt } from './shared.jsx'
+import { fmt } from '../utils/format.js'
 
 export function Math({ tex, display = false }) {
   const html = useMemo(() => {
@@ -14,6 +14,19 @@ export function Math({ tex, display = false }) {
     }
   }, [tex, display])
   return <span className={display ? 'math-block' : 'math-inline'} dangerouslySetInnerHTML={{ __html: html }} />
+}
+
+// Render a text string with inline $...$ LaTeX segments, so labels, hints,
+// and descriptions can carry AASHTO notation (e.g. 'Transit velocity $V_T$').
+export function TexText({ text }) {
+  const parts = String(text).split(/\$([^$]+)\$/g)
+  return (
+    <>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? <Math key={i} tex={p} /> : p ? <span key={i}>{p}</span> : null,
+      )}
+    </>
+  )
 }
 
 // Format a value for LaTeX math (thousands separators, scientific notation).
@@ -33,7 +46,14 @@ export function numTex(v) {
 
 export function unitTex(unit) {
   if (!unit) return ''
-  return unit.replace(/·/g, '{\\cdot}').replace(/²/g, '^{2}').replace(/³/g, '^{3}').replace(/\^2/g, '^{2}').replace(/\^3/g, '^{3}')
+  return unit
+    .replace(/·/g, '{\\cdot}')
+    .replace(/²/g, '^{2}')
+    .replace(/³/g, '^{3}')
+    .replace(/\^2/g, '^{2}')
+    .replace(/\^3/g, '^{3}')
+    .replace(/%/g, '\\%')
+    .replace(/°/g, '^{\\circ}')
 }
 
 // Build the full "symbol = formula = substituted = result" chain in LaTeX.

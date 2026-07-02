@@ -1,4 +1,4 @@
-// Vessel-collision engine for VesselImpactX.
+// Vessel-collision engine for VesselImpact.
 //
 // Every equation, clause, table, and figure reference comes from Section 3.14
 // (Vessel Collision: CV) of the AASHTO LRFD Bridge Design Specifications,

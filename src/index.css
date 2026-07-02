@@ -1,6 +1,7 @@
 :root {
-  /* VesselImpactX palette: deep harbor navy, maritime blue accent, flat cards */
-  --bg: #eef1f5;
+  /* VesselImpact palette: deep harbor navy, maritime blue accent, flat cards */
+  --bg: #edf1f6;
+  --bg-deep: #e4eaf2;
   --surface: #ffffff;
   --surface-strong: #eef2f7;
   --border: #e2e7ee;
@@ -10,6 +11,7 @@
   --text-soft: #6b7787;
   --accent: #1f5fa6;
   --accent-strong: #16487f;
+  --accent-tint: #eaf2fa;
   --success: #1f7a55;
   --danger: #c1473d;
   --warning: #b9591a;
@@ -44,7 +46,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: var(--text);
-  background-color: var(--bg);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%) fixed;
 }
 
 button,
