@@ -56,6 +56,26 @@ export async function generateVesselImpactPdf(data) {
     doc.setFontSize(size)
   }
 
+  // jsPDF's built-in Helvetica is WinAnsi-encoded and renders characters above
+  // U+00FF (<=, >=, sigma, theta, ->, infinity, ...) as mojibake. Map them to
+  // ASCII before drawing any label / note / verdict text. Glyphs that do exist
+  // in WinAnsi (x, middot, degree, en/em dash) are left untouched.
+  const asciiText = (s) =>
+    String(s)
+      .replace(/≤/g, '<=')
+      .replace(/≥/g, '>=')
+      .replace(/≈/g, '~')
+      .replace(/≠/g, '!=')
+      .replace(/→/g, '->')
+      .replace(/∞/g, 'inf')
+      .replace(/σ/g, 'sigma')
+      .replace(/Σ/g, 'Sigma')
+      .replace(/Φ/g, 'Phi')
+      .replace(/φ/g, 'phi')
+      .replace(/θ/g, 'theta')
+      .replace(/Δ/g, 'Delta')
+      .replace(/√/g, 'sqrt')
+
   const drawHeader = () => {
     setFill(C.band)
     doc.rect(0, 0, W, 58, 'F')
@@ -154,7 +174,7 @@ export async function generateVesselImpactPdf(data) {
     doc.text(step.ref, M + 5, y + 6.4, { baseline: 'middle' })
     font('normal', 8.4)
     setText(C.sub)
-    doc.text(`${idx}.  ${step.label}`, M + refW + 8, y + 6.4, { baseline: 'middle' })
+    doc.text(`${idx}.  ${asciiText(step.label)}`, M + refW + 8, y + 6.4, { baseline: 'middle' })
     y += headH
     doc.addImage(eq.dataURL, 'PNG', M + 14, y, ew, eh)
     y += eh + 12
@@ -172,7 +192,7 @@ export async function generateVesselImpactPdf(data) {
       const text = typeof n === 'string' ? n : n.text
       const eqs = typeof n === 'object' && n.latex ? n.latex : []
       font('normal', 8.5)
-      const lines = doc.splitTextToSize(text, innerW - 24)
+      const lines = doc.splitTextToSize(asciiText(text), innerW - 24)
       ensure(lines.length * 11 + 6)
       font('bold', 8.5)
       setText(C.accent)
@@ -206,7 +226,7 @@ export async function generateVesselImpactPdf(data) {
     const first = notes[0]
     const text = typeof first === 'string' ? first : first.text
     font('normal', 8.5)
-    const lines = doc.splitTextToSize(text, innerW - 24)
+    const lines = doc.splitTextToSize(asciiText(text), innerW - 24)
     sectionTitle('Notes', lines.length * 11 + 10)
     await notesBlock(notes)
   }
@@ -255,15 +275,27 @@ export async function generateVesselImpactPdf(data) {
   }
 
   const verdictLine = (pass, text) => {
+    const t = asciiText(text)
     ensure(20)
+    font('bold', 9)
+    const tw = doc.getTextWidth(t) + 34
     setFill(pass ? [232, 245, 238] : [251, 236, 234])
     setDraw(pass ? [191, 227, 207] : [239, 201, 196])
     doc.setLineWidth(0.7)
-    font('bold', 9)
-    const tw = doc.getTextWidth(text) + 26
     doc.roundedRect(M, y - 6, tw, 17, 4, 4, 'FD')
+    // check (pass) or cross (fail) drawn as vectors — Helvetica cannot render the glyphs
+    const mx = M + 11, my = y + 2.5
+    setDraw(pass ? C.pass : C.fail)
+    doc.setLineWidth(1.5)
+    if (pass) {
+      doc.line(mx - 3.4, my + 0.4, mx - 1, my + 2.8)
+      doc.line(mx - 1, my + 2.8, mx + 3.8, my - 3.2)
+    } else {
+      doc.line(mx - 3, my - 3, mx + 3.4, my + 3)
+      doc.line(mx + 3.4, my - 3, mx - 3, my + 3)
+    }
     setText(pass ? C.pass : C.fail)
-    doc.text(`${pass ? '✓' : '✗'}  ${text}`, M + 8, y + 2.5, { baseline: 'middle' })
+    doc.text(t, M + 22, y + 2.5, { baseline: 'middle' })
     y += 21
   }
 
@@ -434,7 +466,10 @@ export async function generateVesselImpactPdf(data) {
     await notesSection([
       'AF is computed for each bridge component and vessel classification; the annual frequency of collapse for the total bridge is the sum of all component AFs (Art. 3.14.5). The acceptance criterion is distributed over the exposed pier and span components within 3.0 × LOA of the transit path (Art. 3.14.5).',
       'The approximate method for PA is an empirical relationship based on historical accident data; influences such as wind, visibility, navigation aids, and pilotage are included only indirectly (C3.14.5.2.3).',
-      'The geometric probability uses a normal distribution with the mean at the vessel transit path centerline and σ = LOA; components beyond 3σ need not be included, other than the minimum impact requirement of Art. 3.14.1 (C3.14.5.3). For barge tows, LOA is the total tow length including the towboat.',
+      {
+        text: 'The geometric probability uses a normal distribution with the mean at the vessel transit path centerline and a standard deviation equal to the length overall; components beyond three standard deviations need not be included, other than the minimum impact requirement of Art. 3.14.1 (C3.14.5.3). For barge tows, LOA is the total tow length including the towboat.',
+        latex: ['\\sigma = LOA'],
+      },
       'The probability of collapse is based on the ratio of the ultimate lateral resistance of the pier (HP) or span (Hs) to the vessel impact force (PS, PBH, PDH, or PMT) per Art. 3.14.5.4.',
       'Verify all results against the governing edition of the AASHTO LRFD Bridge Design Specifications for design use.',
     ])
