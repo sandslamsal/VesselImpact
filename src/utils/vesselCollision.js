@@ -137,29 +137,27 @@ export function bargeImpact({ Wtons, V, CH, BB, headLog }) {
   const KE = (CH * W * V * V) / 29.2
   steps.push(S('Eq. 3.14.7-1', 'vessel collision energy', 'KE &= \\dfrac{C_H\\,W\\,V^2}{29.2}', `\\dfrac{${nf(CH)} \\times ${nf(W)} \\times ${nf(V)}^2}{29.2}`, KE, 'kip·ft'))
 
-  // width modification for non-standard barges (AASHTO Guide Spec. 2009 practice;
-  // reduces to Eqs. 3.14.11-1/-2 and 3.14.12-1 for the 35-ft standard hopper barge)
+  // Non-standard barge width: the AASHTO Guide Specifications for Vessel Collision
+  // Design (2009) carry the width ratio R_B = B_B/35 inside the bow-damage-depth
+  // equation (GS Eq. 3.13-1); the LRFD force equations 3.14.11-1/-2 then follow
+  // directly from that a_B, with no separate scaling of P_B. LRFD 9th Ed. Eq.
+  // 3.14.12-1 is the standard-barge form (R_B = 1).
   const RB = BB / 35
   const nonStd = abs(BB - 35) > 1e-9
   if (nonStd) {
-    steps.push(S('GS C3.14.11', 'barge width ratio for non-standard barge', 'R_B &= \\dfrac{B_B}{35}', `\\tfrac{${nf(BB)}}{35}`, RB, ''))
+    steps.push(S('GS Eq. 3.13-1', 'barge width ratio for non-standard barge', 'R_B &= \\dfrac{B_B}{35}', `\\tfrac{${nf(BB)}}{35}`, RB, ''))
   }
 
   const aB = (10.2 / RB) * (sqrt(1 + KE / 5672) - 1)
-  steps.push(S('Eq. 3.14.12-1', 'barge bow damage length', nonStd ? 'a_B &= \\dfrac{10.2}{R_B}\\left(\\sqrt{1+\\dfrac{KE}{5{,}672}}-1\\right)' : 'a_B &= 10.2\\left(\\sqrt{1+\\dfrac{KE}{5{,}672}}-1\\right)', `${nonStd ? `\\tfrac{10.2}{${nf(RB)}}` : '10.2'}\\left(\\sqrt{1+\\tfrac{${nf(KE)}}{5{,}672}}-1\\right)`, aB, 'ft'))
+  steps.push(S(nonStd ? 'GS Eq. 3.13-1' : 'Eq. 3.14.12-1', 'barge bow damage length', nonStd ? 'a_B &= \\dfrac{10.2}{R_B}\\left(\\sqrt{1+\\dfrac{KE}{5{,}672}}-1\\right)' : 'a_B &= 10.2\\left(\\sqrt{1+\\dfrac{KE}{5{,}672}}-1\\right)', `${nonStd ? `\\tfrac{10.2}{${nf(RB)}}` : '10.2'}\\left(\\sqrt{1+\\tfrac{${nf(KE)}}{5{,}672}}-1\\right)`, aB, 'ft'))
 
-  let PBstd
+  let PB
   if (aB < 0.34) {
-    PBstd = 4112 * aB
-    steps.push(S('Eq. 3.14.11-1', 'barge collision force (aB < 0.34 ft)', 'P_B &= 4{,}112\\,a_B', `4{,}112 \\times ${nf(aB)}`, PBstd, 'kip'))
+    PB = 4112 * aB
+    steps.push(S('Eq. 3.14.11-1', 'barge collision force (aB < 0.34 ft)', 'P_B &= 4{,}112\\,a_B', `4{,}112 \\times ${nf(aB)}`, PB, 'kip'))
   } else {
-    PBstd = 1349 + 110 * aB
-    steps.push(S('Eq. 3.14.11-2', 'barge collision force (aB ≥ 0.34 ft)', 'P_B &= 1{,}349+110\\,a_B', `1{,}349+110 \\times ${nf(aB)}`, PBstd, 'kip'))
-  }
-  let PB = PBstd
-  if (nonStd) {
-    PB = PBstd * RB
-    steps.push(S('GS C3.14.11', 'force scaled by the barge width ratio', 'P_B &= R_B\\,P_{B,std}', `${nf(RB)} \\times ${nf(PBstd)}`, PB, 'kip'))
+    PB = 1349 + 110 * aB
+    steps.push(S('Eq. 3.14.11-2', 'barge collision force (aB ≥ 0.34 ft)', 'P_B &= 1{,}349+110\\,a_B', `1{,}349+110 \\times ${nf(aB)}`, PB, 'kip'))
   }
   if (headLog > 3.0) {
     const RHL = headLog / 3.0
