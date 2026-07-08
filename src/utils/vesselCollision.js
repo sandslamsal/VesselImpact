@@ -178,6 +178,38 @@ export function bargeImpact({ Wtons, V, CH, BB, headLog }) {
 }
 
 // ---------------------------------------------------------------------------
+// Minimum design impact - empty hopper barge drifting at the yearly mean
+// current (Art. 3.14.1). This sets a floor on the substructure design force:
+// the governing impact is the larger of the computed vessel force and this
+// minimum. The design barge is the standard 35-ft hopper barge with a 200-ton
+// empty displacement, evaluated with the barge-force equations (Eqs. 3.14.11,
+// 3.14.12). The 1.7-ft empty draft leaves ample underkeel clearance, so
+// C_H = 1.05 (Eq. 3.14.7-2).
+// ---------------------------------------------------------------------------
+export function minimumImpact({ Vmin, CH = 1.05 }) {
+  const steps = []
+  const Wtons = 200
+  steps.push(S('Art. 3.14.1', 'empty standard hopper barge, 35 ft x 195 ft, 200-ton empty displacement', 'W_{tons} &= 200\\;\\text{tons (empty)}', null, Wtons, 'tons'))
+  const W = 0.907 * Wtons
+  steps.push(S('C3.14.1', 'empty displacement in metric tonnes', 'W &= 0.907\\,W_{tons}', `0.907 \\times ${nf(Wtons)}`, W, 'tonne'))
+  steps.push(S('Art. 3.14.1', 'drifting at the yearly mean current velocity', 'V &= V_{MIN}', `${nf(Vmin)}`, Vmin, 'ft/s'))
+  steps.push(S('Eq. 3.14.7-2', 'hydrodynamic mass coefficient (ample underkeel clearance for the 1.7-ft empty draft)', 'C_H &= 1.05', '1.05', CH, ''))
+  const KE = (CH * W * Vmin * Vmin) / 29.2
+  steps.push(S('Eq. 3.14.7-1', 'collision energy of the drifting empty barge', 'KE &= \\dfrac{C_H\\,W\\,V_{MIN}^2}{29.2}', `\\dfrac{${nf(CH)} \\times ${nf(W)} \\times ${nf(Vmin)}^2}{29.2}`, KE, 'kip·ft'))
+  const aB = 10.2 * (sqrt(1 + KE / 5672) - 1)
+  steps.push(S('Eq. 3.14.12-1', 'barge bow damage length (standard 35-ft barge)', 'a_B &= 10.2\\left(\\sqrt{1+\\dfrac{KE}{5{,}672}}-1\\right)', `10.2\\left(\\sqrt{1+\\tfrac{${nf(KE)}}{5{,}672}}-1\\right)`, aB, 'ft'))
+  let PBmin
+  if (aB < 0.34) {
+    PBmin = 4112 * aB
+    steps.push(S('Eq. 3.14.11-1', 'minimum design impact force (aB < 0.34 ft)', 'P_{min} &= 4{,}112\\,a_B', `4{,}112 \\times ${nf(aB)}`, PBmin, 'kip'))
+  } else {
+    PBmin = 1349 + 110 * aB
+    steps.push(S('Eq. 3.14.11-2', 'minimum design impact force (aB ≥ 0.34 ft)', 'P_{min} &= 1{,}349+110\\,a_B', `1{,}349+110 \\times ${nf(aB)}`, PBmin, 'kip'))
+  }
+  return { PBmin, W, KE, aB, Wtons, CH, Vmin, steps }
+}
+
+// ---------------------------------------------------------------------------
 // Annual frequency of collapse - Method II (Art. 3.14.5)
 // ---------------------------------------------------------------------------
 export const DENSITY_OPTIONS = ['low', 'average', 'high']

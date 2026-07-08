@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Ship } from 'lucide-react'
-import { shipImpact, designVelocity, hydroMassCoeff } from '../utils/vesselCollision.js'
-import { num, NumberField, ResultCard, SelectField } from './shared.jsx'
+import { shipImpact, designVelocity, hydroMassCoeff, minimumImpact } from '../utils/vesselCollision.js'
+import { num, NumberField, ResultCard, SelectField, Verdict, fmt } from './shared.jsx'
 import { MathStepList, MathValues, mvtex, TexText } from './mathview.jsx'
 import { Figure } from './figview.jsx'
 import { shipImpactFigure } from '../utils/figures.js'
@@ -42,7 +42,8 @@ export function ShipImpact() {
       if (!(vel.V > 0)) return null
       const ch = hydroMassCoeff({ ukc: inp.ukc, draft: inp.draft })
       const ship = shipImpact({ DWT: inp.DWT, W: inp.W, V: vel.V, CH: ch.CH, DB: inp.DB, hExp: inp.hExp })
-      return { vel, ch, ship }
+      const min = minimumImpact({ Vmin: inp.Vmin })
+      return { vel, ch, ship, min }
     } catch {
       return null
     }
@@ -165,6 +166,29 @@ export function ShipImpact() {
               ]}
             />
             <MathStepList steps={res.ship.sup} title="Derivation" />
+          </section>
+
+          <section className="results-card">
+            <div className="results-head">
+              <div>
+                <h3>Minimum Design Impact (Art. 3.14.1)</h3>
+                <p><TexText text="An empty hopper barge drifting at the yearly mean current ($V_{MIN}$) sets a floor on the substructure design force. The governing force is the larger of the computed ship impact and this minimum. Where a deep-draft span has insufficient clearance, the minimum superstructure impact is the mast collision force $P_{MT}$ (Art. 3.14.10.3)." />
+                </p>
+              </div>
+            </div>
+            <MathValues
+              items={[
+                mvtex('P_{min}', res.min.PBmin, 'kip'),
+                mvtex('P_{design}=\\max(P_S,P_{min})', Math.max(res.ship.PS, res.min.PBmin), 'kip'),
+              ]}
+            />
+            <Verdict
+              pass={res.ship.PS >= res.min.PBmin}
+              label={res.ship.PS >= res.min.PBmin
+                ? `Computed impact governs:  $P_S = ${fmt(res.ship.PS)}$ kip $\\ge P_{min} = ${fmt(res.min.PBmin)}$ kip`
+                : `Minimum governs, design for  $P_{min} = ${fmt(res.min.PBmin)}$ kip $> P_S = ${fmt(res.ship.PS)}$ kip`}
+            />
+            <MathStepList steps={res.min.steps} title="Minimum drifting-barge impact (Art. 3.14.1)" />
           </section>
 
           <ReportCard

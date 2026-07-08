@@ -337,6 +337,7 @@ export async function generateVesselImpactPdf(data) {
       mv('P_{BH}', s.PBH, 'kip', 0),
       mv('P_{DH}', s.PDH, 'kip', 0),
       mv('P_{MT}', s.PMT, 'kip', 0),
+      mv('P_{min}', res.min.PBmin, 'kip', 0),
     ])
     sectionTitle('Definition Diagram', 300)
     await drawFigure(
@@ -358,6 +359,15 @@ export async function generateVesselImpactPdf(data) {
     await drawSteps(s.sup)
     sectionTitle('Application of Impact Force (Art. 3.14.14.1)', 90)
     await drawSteps(s.app)
+    sectionTitle('Minimum Design Impact (Art. 3.14.1)', 90)
+    await drawSteps(res.min.steps)
+    verdictLine(
+      s.PS >= res.min.PBmin,
+      s.PS >= res.min.PBmin
+        ? `Computed impact governs:  P_S = ${fmt(s.PS, 0)} kip >= P_min = ${fmt(res.min.PBmin, 0)} kip`
+        : `Minimum governs, design for P_min = ${fmt(res.min.PBmin, 0)} kip > P_S = ${fmt(s.PS, 0)} kip`,
+    )
+    y += 4
     await notesSection([
       'The equivalent static impact force represents a probabilistically based, worst-case, head-on collision with the vessel moving forward at relatively high velocity (C3.14.1). Requirements apply to steel-hulled merchant ships larger than 1,000 DWT.',
       'For substructure design, 100 percent of the impact force is applied parallel to the channel centerline, or 50 percent normal to it, as separate load cases (Art. 3.14.14.1). For overall stability the force is applied as a concentrated force at the mean high water level; for local checks it is a line load over the bow depth (Figs. 3.14.14.1-1, -2).',
@@ -392,6 +402,7 @@ export async function generateVesselImpactPdf(data) {
       mv('KE', b.KE, 'kip{\\cdot}ft', 0),
       mv('a_B', b.aB, 'ft'),
       mv('P_B', b.PB, 'kip', 0),
+      mv('P_{min}', res.min.PBmin, 'kip', 0),
     ])
     sectionTitle('Definition Diagram', 300)
     await drawFigure(
@@ -410,6 +421,15 @@ export async function generateVesselImpactPdf(data) {
     await drawSteps(b.steps)
     sectionTitle('Application of Impact Force (Art. 3.14.14.1)', 90)
     await drawSteps(b.app)
+    sectionTitle('Minimum Design Impact (Art. 3.14.1)', 90)
+    await drawSteps(res.min.steps)
+    verdictLine(
+      b.PB >= res.min.PBmin,
+      b.PB >= res.min.PBmin
+        ? `Computed impact governs:  P_B = ${fmt(b.PB, 0)} kip >= P_min = ${fmt(res.min.PBmin, 0)} kip`
+        : `Minimum governs, design for P_min = ${fmt(res.min.PBmin, 0)} kip > P_B = ${fmt(b.PB, 0)} kip`,
+    )
+    y += 4
     await notesSection([
       'The standard hopper barge is 35.0 ft × 195.0 ft with 12.0 ft depth, 1.7 ft empty draft, 8.7 ft loaded draft, and 1,700 tons DWT (Art. 3.14.11). Eqs. 3.14.11-1/-2 and 3.14.12-1 were developed from Meir-Dornberg (1983) collision research (C3.14.11).',
       'Displacement tonnage of a barge tow is the tug/tow vessel plus the combined displacement of one row of barges in the length of the tow (Art. 3.14.7). LOA of the tow includes the tug (Art. 3.14.6). Barges are rated in tons (2,000 lb); Eq. 3.14.7-1 uses metric tonnes (2,205 lb).',

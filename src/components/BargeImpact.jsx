@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Container } from 'lucide-react'
-import { bargeImpact, designVelocity, hydroMassCoeff } from '../utils/vesselCollision.js'
-import { num, NumberField, ResultCard, SelectField } from './shared.jsx'
+import { bargeImpact, designVelocity, hydroMassCoeff, minimumImpact } from '../utils/vesselCollision.js'
+import { num, NumberField, ResultCard, SelectField, Verdict, fmt } from './shared.jsx'
 import { MathStepList, MathValues, mvtex, TexText } from './mathview.jsx'
 import { Figure } from './figview.jsx'
 import { bargeImpactFigure } from '../utils/figures.js'
@@ -43,7 +43,8 @@ export function BargeImpact() {
       if (!(vel.V > 0)) return null
       const ch = hydroMassCoeff({ ukc: inp.ukc, draft: inp.draft })
       const barge = bargeImpact({ Wtons: inp.Wtons, V: vel.V, CH: ch.CH, BB: inp.BB, headLog: inp.headLog })
-      return { vel, ch, barge }
+      const min = minimumImpact({ Vmin: inp.Vmin })
+      return { vel, ch, barge, min }
     } catch {
       return null
     }
@@ -142,6 +143,28 @@ export function BargeImpact() {
             <MathStepList steps={res.ch.steps} title="Hydrodynamic mass coefficient (Art. 3.14.7)" />
             <MathStepList steps={res.barge.steps} title="Collision energy, bow damage, and impact force" />
             <MathStepList steps={res.barge.app} title="Application of impact force (Art. 3.14.14.1)" />
+          </section>
+
+          <section className="results-card">
+            <div className="results-head">
+              <div>
+                <h3>Minimum Design Impact (Art. 3.14.1)</h3>
+                <p><TexText text="An empty hopper barge drifting at the yearly mean current ($V_{MIN}$) sets a floor on the substructure design force. The governing force is the larger of the computed impact and this minimum." /></p>
+              </div>
+            </div>
+            <MathValues
+              items={[
+                mvtex('P_{min}', res.min.PBmin, 'kip'),
+                mvtex('P_{design}=\\max(P_B,P_{min})', Math.max(res.barge.PB, res.min.PBmin), 'kip'),
+              ]}
+            />
+            <Verdict
+              pass={res.barge.PB >= res.min.PBmin}
+              label={res.barge.PB >= res.min.PBmin
+                ? `Computed impact governs:  $P_B = ${fmt(res.barge.PB)}$ kip $\\ge P_{min} = ${fmt(res.min.PBmin)}$ kip`
+                : `Minimum governs, design for  $P_{min} = ${fmt(res.min.PBmin)}$ kip $> P_B = ${fmt(res.barge.PB)}$ kip`}
+            />
+            <MathStepList steps={res.min.steps} title="Minimum drifting-barge impact (Art. 3.14.1)" />
           </section>
 
           <ReportCard
